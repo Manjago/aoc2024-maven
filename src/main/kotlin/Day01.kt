@@ -1,4 +1,5 @@
 import day01.day01Part1
+import day01.day01Part2
 
 fun main() {
     fun part1(input: List<String>): Int {
@@ -6,7 +7,7 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.size
+        return day01Part2(input)
     }
 
     val testInput = readInput("Day01_test")
@@ -16,7 +17,7 @@ fun main() {
     // Read the input from the `src/Day01.txt` file.
     val input = readInput("Day01")
     part1(input).println()
-    /*
-        part2(input).println()
-    */
+    val testPart2 = part2(testInput)
+    check(testPart2 == 31) { "Expected 31 but got $testPart2" }
+    part2(input).println()
 }

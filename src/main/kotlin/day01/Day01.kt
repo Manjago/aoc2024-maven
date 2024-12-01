@@ -3,10 +3,7 @@ package day01
 import kotlin.math.abs
 
 fun day01Part1(input: List<String>): Int {
-    val data = input.asSequence().map { it.split("   ") }
-        .map{
-            listOf(it[0].toInt(), it[1].toInt())
-        }.toList()
+    val data = readInput(input)
 
     var dist = 0
     val deleted0 = Array<Boolean>(data.size) { false }
@@ -39,3 +36,36 @@ fun day01Part1(input: List<String>): Int {
 
     return dist
 }
+
+fun day01Part2(input: List<String>): Int {
+    val data: List<List<Int>> = readInput(input)
+    val mapa = mutableMapOf<Int, Int>()
+    data.forEach {
+        val key = it[1]
+        if (mapa.containsKey(key)) {
+            mapa[key] = mapa[key]!!.plus(1)
+        } else {
+            mapa[key] = 1
+        }
+    }
+
+    var score = 0
+    data.forEach {
+        val item = it[0]
+        if (mapa.containsKey(item)) {
+            val add = mapa[item]!!
+            var rewritedAdd = item * add
+            score += rewritedAdd
+            //println("For item $item addition $add, rewritedAdd $rewritedAdd, total score: $score")
+        } //else {
+            //println("For item $item skipping $score, total score: $score")
+        //}
+    }
+
+    return score
+}
+
+private fun readInput(input: List<String>): List<List<Int>> = input.asSequence().map { it.split("   ") }
+    .map {
+        listOf(it[0].toInt(), it[1].toInt())
+    }.toList()

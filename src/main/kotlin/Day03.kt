@@ -89,7 +89,7 @@ fun main() {
 
     val testInput = readInput("Day03_test")
     val testPart1 = part1(testInput)
-    check(testPart1 == BigInteger.valueOf(161L)) { "Expected ` but got $testPart1" }
+    check(testPart1 == BigInteger.valueOf(161L)) { "Expected 161 but got $testPart1" }
 
     val input = readInput("Day03")
     part1(input).println()  // 153469856

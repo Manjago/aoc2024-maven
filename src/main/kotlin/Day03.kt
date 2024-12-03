@@ -12,7 +12,9 @@ enum class Day3State {
 
 fun main() {
 
-    fun parseAndCalc(input: String): BigInteger {
+    var stateEnabled = true
+
+    fun parseAndCalc(input: String, withSkip: Boolean = false): BigInteger {
         var answer = BigInteger.ZERO
         var state = WAIT_M
         val chars = input.toCharArray()
@@ -22,6 +24,14 @@ fun main() {
 
         for (i in chars.indices) {
             val char = chars[i]
+
+            if (withSkip) {
+                when (char) {
+                    'а' -> stateEnabled = true
+                    'б' -> stateEnabled = false
+                }
+            }
+
             val oldState = state
             when (state) {
                 WAIT_M -> if ('m' == char) state = WAIT_U
@@ -55,15 +65,17 @@ fun main() {
                         val second = secondNum.toString().toBigInteger()
                         val delta = first * second
                         val prevAnser = answer
-                        answer += delta
-                        println("$first * $second = $delta, $prevAnser -> $answer")
+                        if (stateEnabled) {
+                            answer += delta
+                        }
+                        debug("enabled = $stateEnabled, $first * $second = $delta, $prevAnser -> $answer")
                         WAIT_M
                     }
 
                     else -> WAIT_M
                 }
             }
-            println("For char $char $oldState -> $state, first $firstNum, second $secondNum")
+            debug("For char $char $oldState -> $state, first $firstNum, second $secondNum")
         }
         return answer
     }
@@ -72,21 +84,21 @@ fun main() {
         parseAndCalc(string)
     }.sumOf { it }
 
-    fun part2(input: List<String>): Int {
-        return 1
-    }
+    fun part2(input: List<String>): BigInteger = input.asSequence().map { string -> string.replace("do()", "а") }
+        .map { string -> string.replace("don't()", "б") }.map { string -> parseAndCalc(string, true) }.sumOf { it }
 
     val testInput = readInput("Day03_test")
     val testPart1 = part1(testInput)
     check(testPart1 == BigInteger.valueOf(161L)) { "Expected ` but got $testPart1" }
 
     val input = readInput("Day03")
-    part1(input).println()
-    // 153469856
-    /*
-        val testPart2 = part2(testInput)
-        check(testPart2 == 1) { "Expected 1 but got $testPart2" }
-        part2(input).println()
-    */
+    part1(input).println()  // 153469856
+
+    val testInput2 = readInput("Day03_2_test")
+
+    val testPart2 = part2(testInput2)
+    check(testPart2 == BigInteger.valueOf(48L)) { "Expected 48 but got $testPart2" }
+    part2(input).println() //77055967
+
 }
 

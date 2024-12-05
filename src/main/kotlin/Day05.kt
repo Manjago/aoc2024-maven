@@ -13,67 +13,110 @@ fun main() {
         fun pagesBefore(page: Int) : Sequence<Int> = rules.asSequence().filter{it.next == page}.map{it.next}
     }
 
-    fun parseInput(input: List<String>) : Pair<Rules, List<List<Int>>> {
+    fun parseInput(input: List<String>) : Pair<Rules, List<MutableList<Int>>> {
         val rules = Rules()
-        val updates: MutableList<List<Int>> = mutableListOf()
+        val updates: MutableList<MutableList<Int>> = mutableListOf()
 
         for (s in input) {
             when {
                 s.contains("|") -> rules.parseAndAddRule(s)
-                s.contains(",") -> updates.add(s.split(",").asSequence().map { it.toInt() }.toList())
+                s.contains(",") -> updates.add(s.split(",").asSequence().map { it.toInt() }.toMutableList())
             }
         }
         return Pair(rules, updates)
     }
 
-    fun corePart1(input: List<String>): Pair<List<List<Int>>, List<List<Int>>> {
+    fun isGoodByRules(update: List<Int>, rules: Rules): Boolean {
+        for (i in 0..update.lastIndex) {
+            val page = update[i]
+            if (rules.pagesAfter(page).any { next ->
+                    val pos = update.indexOf(next)
+                    pos >= 0 && pos < i
+                }) {
+                return false
+            }
+
+            if (rules.pagesBefore(page).any { prev ->
+                    val pos = update.indexOf(prev)
+                    pos >= 0 && pos > i
+                }) {
+                return false
+            }
+        }
+        return true
+    }
+
+    fun sortByGoodAndBad(input: List<String>): Triple<List<MutableList<Int>>, List<MutableList<Int>>, Rules> {
 
         val (rules, updates) = parseInput(input)
 
-        val good = mutableListOf<List<Int>>()
-        val bad = mutableListOf<List<Int>>()
+        val good = mutableListOf<MutableList<Int>>()
+        val bad = mutableListOf<MutableList<Int>>()
 
         for (update in updates) {
-            var badFound = false
-
-            for(i in 0..update.lastIndex) {
-                val page = update[i]
-                if (rules.pagesAfter(page).any { next ->
-                        val pos = update.indexOf(next)
-                        pos >= 0 && pos < i
-                    }) {
-                    badFound = true
-                    bad.add(update)
-                    break
-                }
-
-                if (rules.pagesBefore(page).any { prev ->
-                        val pos = update.indexOf(prev)
-                        pos >= 0 && pos > i
-                    }) {
-                    bad.add(update)
-                    break
-                }
-
-            }
-
-            if (!badFound) {
-                debug("found $update")
+            if (isGoodByRules(update, rules)) {
                 good.add(update)
+            } else {
+                bad.add(update)
             }
-
         }
 
-        return good to bad
+        return Triple(good, bad, rules)
     }
 
     fun part1(input: List<String>): Int {
-        val (good, _) = corePart1(input)
+        val (good, _) = sortByGoodAndBad(input)
         return good.asSequence().map { it[it.size / 2] }.sum()
     }
 
+    fun MutableList<Int>.swap(i: Int, j: Int) {
+        val t = this[i]
+        this[i] = this[j]
+        this[j] = t
+    }
+
     fun part2(input: List<String>): Int {
-        return 1
+        val (_, bad, rules) = sortByGoodAndBad(input)
+
+        bad.forEach { b ->
+
+             while(!isGoodByRules(b, rules)) {
+
+                 for(i in 0 ..b.lastIndex) {
+                     val page = b[i]
+
+                     val badNext = rules.pagesAfter(page).find { next ->
+                         val pos = b.indexOf(next)
+                         pos >= 0 && pos < i
+                     }
+                     val badNextIndex = if (badNext != null) { b.indexOf(badNext) } else null
+                     if (badNextIndex != null) {
+                         b.swap(i, badNextIndex)
+                     }
+                 }
+
+             }
+
+             while(!isGoodByRules(b, rules)) {
+
+                 for(i in 0 ..b.lastIndex) {
+                     val page = b[i]
+
+                     val badPrev = rules.pagesBefore(page).find { prev ->
+                         val pos = b.indexOf(prev)
+                         pos >= 0 && pos > i
+                     }
+                     val badPrevIndex = if (badPrev != null) { b.indexOf(badPrev) } else null
+                     if (badPrevIndex != null) {
+                         b.swap(i, badPrevIndex)
+                     }
+                 }
+
+             }
+
+        }
+
+        return bad.asSequence().map { it[it.size / 2] }.sum()
     }
 
     val testInput = readInput("Day05_test")
@@ -85,6 +128,6 @@ fun main() {
     part1.println()
     check(part1 == 4924) { "Expected 4924 but got $part1" }
     val testPart2 = part2(testInput)
-    check(testPart2 == 1) { "Expected 1 but got $testPart2" }
+    check(testPart2 == 123) { "Expected 123 but got $testPart2" }
     part2(input).println()
 }

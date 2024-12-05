@@ -13,8 +13,7 @@ fun main() {
         fun pagesBefore(page: Int) : Sequence<Int> = rules.asSequence().filter{it.next == page}.map{it.next}
     }
 
-    fun part1(input: List<String>): Int {
-
+    fun parseInput(input: List<String>) : Pair<Rules, List<List<Int>>> {
         val rules = Rules()
         val updates: MutableList<List<Int>> = mutableListOf()
 
@@ -24,8 +23,15 @@ fun main() {
                 s.contains(",") -> updates.add(s.split(",").asSequence().map { it.toInt() }.toList())
             }
         }
+        return Pair(rules, updates)
+    }
 
-        var answer = 0
+    fun corePart1(input: List<String>): Pair<List<List<Int>>, List<List<Int>>> {
+
+        val (rules, updates) = parseInput(input)
+
+        val good = mutableListOf<List<Int>>()
+        val bad = mutableListOf<List<Int>>()
 
         for (update in updates) {
             var badFound = false
@@ -37,6 +43,7 @@ fun main() {
                         pos >= 0 && pos < i
                     }) {
                     badFound = true
+                    bad.add(update)
                     break
                 }
 
@@ -44,6 +51,7 @@ fun main() {
                         val pos = update.indexOf(prev)
                         pos >= 0 && pos > i
                     }) {
+                    bad.add(update)
                     break
                 }
 
@@ -51,12 +59,17 @@ fun main() {
 
             if (!badFound) {
                 debug("found $update")
-                answer += update[update.size / 2]
+                good.add(update)
             }
 
         }
 
-        return answer
+        return good to bad
+    }
+
+    fun part1(input: List<String>): Int {
+        val (good, _) = corePart1(input)
+        return good.asSequence().map { it[it.size / 2] }.sum()
     }
 
     fun part2(input: List<String>): Int {
@@ -68,7 +81,9 @@ fun main() {
     check(testPart1 == 143) { "Expected 143 but got $testPart1" }
 
     val input = readInput("Day05")
-    part1(input).println()
+    val part1 = part1(input)
+    part1.println()
+    check(part1 == 4924) { "Expected 4924 but got $part1" }
     val testPart2 = part2(testInput)
     check(testPart2 == 1) { "Expected 1 but got $testPart2" }
     part2(input).println()

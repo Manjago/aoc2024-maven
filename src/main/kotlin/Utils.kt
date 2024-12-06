@@ -21,3 +21,12 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
 fun Any?.println() = println(this)
 
 fun debug(s: String) {if (false) println(s)}
+
+enum class Direction(internal val x: Int, internal val y: Int) {
+    NORTH(0, -1), WEST(-1, 0), EAST(1, 0), SOUTH(0, 1)
+}
+
+data class Point(val x: Int, val y: Int) {
+    operator fun plus(other: Direction) = Point(x + other.x, y + other.y)
+}
+

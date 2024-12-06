@@ -1,3 +1,7 @@
+import Direction.EAST
+import Direction.NORTH
+import Direction.SOUTH
+import Direction.WEST
 import java.math.BigInteger
 import java.security.MessageDigest
 import kotlin.io.path.Path
@@ -26,7 +30,16 @@ enum class Direction(internal val x: Int, internal val y: Int) {
     NORTH(0, -1), WEST(-1, 0), EAST(1, 0), SOUTH(0, 1)
 }
 
-data class Point(val x: Int, val y: Int) {
-    operator fun plus(other: Direction) = Point(x + other.x, y + other.y)
+data class SimplePoint(val x: Int, val y: Int)
+
+data class OrientedPoint(val x: Int, val y: Int, val direction: Direction) {
+    fun turnRight(): OrientedPoint = when (direction) {
+        NORTH -> copy(direction = EAST)
+        WEST -> copy(direction = NORTH)
+        EAST -> copy(direction = SOUTH)
+        SOUTH -> copy(direction = WEST)
+    }
+    fun step(): OrientedPoint = OrientedPoint(x + direction.x, y + direction.y, direction)
+    fun toSimplePoint() = SimplePoint(x, y)
 }
 

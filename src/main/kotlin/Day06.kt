@@ -1,23 +1,20 @@
-import Direction.EAST
 import Direction.NORTH
-import Direction.SOUTH
-import Direction.WEST
 
 fun main() {
 
     class Maze(val width: Int, val height: Int) {
-        private val obstacles = mutableSetOf<Point>()
+        private val obstacles = mutableSetOf<SimplePoint>()
 
-        fun addObstacle(point: Point) {
+        fun addObstacle(point: SimplePoint) {
             obstacles.add(point)
         }
 
-        fun hasObstacle(point: Point): Boolean {
-            return obstacles.contains(point)
+        fun hasObstacle(point: OrientedPoint): Boolean {
+            return obstacles.contains(point.toSimplePoint())
         }
 
-        fun inMe(point: Point): Boolean {
-            return point.x in 0..width-1 && point.y in 0..height-1
+        fun inMe(point: OrientedPoint): Boolean {
+            return point.x in 0..width - 1 && point.y in 0..height - 1
         }
 
         override fun toString(): String {
@@ -26,42 +23,33 @@ fun main() {
 
     }
 
-    fun parseMaze(input: List<String>): Pair<Maze, Point> {
+    fun parseMaze(input: List<String>): Pair<Maze, OrientedPoint> {
         val maze = Maze(input[0].length, input.size)
-        var pos: Point? = null
-        for(y in 0 until input.size)
-            for(x in 0 until input[0].length) {
-                val char = input[y][x]
-                when(char) {
-                    '#' -> maze.addObstacle(Point(x, y))
-                    '^' -> pos = Point(x, y)
-                }
+        var pos: OrientedPoint? = null
+        for (y in 0 until input.size) for (x in 0 until input[0].length) {
+            val char = input[y][x]
+            when (char) {
+                '#' -> maze.addObstacle(SimplePoint(x, y))
+                '^' -> pos = OrientedPoint(x, y, NORTH)
             }
-        return maze to (pos?: throw IllegalStateException("No initial position"))
-    }
-
-    fun next(direction: Direction): Direction = when(direction) {
-        NORTH -> EAST
-        WEST -> NORTH
-        EAST -> SOUTH
-        SOUTH -> WEST
+        }
+        return maze to (pos ?: throw IllegalStateException("No initial position"))
     }
 
     fun part1(input: List<String>): Int {
         val (maze, initialPos) = parseMaze(input)
-        var direction = NORTH
         var pos = initialPos
 
-        val seen = mutableSetOf<Point>()
+        val seen = mutableSetOf<SimplePoint>()
 
         while (maze.inMe(pos)) {
-             seen.add(pos)
-             val nextStep = pos + direction
-             if (maze.hasObstacle(nextStep)) {
-                 direction = next(direction)
-             } else {
-                 pos = nextStep
-             }
+            seen.add(SimplePoint(pos.x, pos.y))
+            val nextStep = pos.step()
+            if (maze.hasObstacle(nextStep)) {
+                pos = pos.turnRight()
+            } else {
+                pos = nextStep
+            }
         }
 
         return seen.size
@@ -76,7 +64,9 @@ fun main() {
     check(testPart1 == 41) { "Expected 41 but got $testPart1" }
 
     val input = readInput("Day06")
-    part1(input).println()
+    val part1 = part1(input)
+    part1.println()
+    check(part1 == 5095) { "Expected 5095 but got $part1" }
     val testPart2 = part2(testInput)
     check(testPart2 == 1) { "Expected 1 but got $testPart2" }
     part2(input).println()

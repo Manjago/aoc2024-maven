@@ -146,6 +146,6 @@ fun main() {
     part1.println()
     check(part1 == BigInteger.valueOf(12553187650171L)) { "Expected 12553187650171 but got $part1" }
         val testPart2 = part2(testInput)
-        check(testPart2 == BigInteger.valueOf(11387L)) { "Expected 1 but got $testPart2" }
+        check(testPart2 == BigInteger.valueOf(11387L)) { "Expected 11387L but got $testPart2" }
     part2(input).println()
 }

@@ -13,6 +13,18 @@ fun main() {
         return false
     }
 
+    fun Array<Char>.nextExt() : Boolean {
+        var counter = 0
+        while(counter < this.size) {
+            when(this[counter]) {
+              '+' -> {this[counter] = '*'; return true}
+              '*' -> {this[counter] = '|'; return true}
+              '|' -> {this[counter] = '+'; counter++}
+            }
+        }
+        return false
+    }
+
     data class SingleEquation(val expected: BigInteger, val items: List<BigInteger>) {
         fun checkMe(): Boolean {
 
@@ -43,6 +55,41 @@ fun main() {
 
             return false
         }
+
+        fun checkMeExt(): Boolean {
+
+            val instruction = Array<Char>(items.size - 1) {'+'}
+
+            do{
+                var index = 0
+                var result = BigInteger.ZERO
+                for(i in items.indices){
+
+                    if (i == 0) {
+                        result = items[i]
+                    } else {
+                        val item = items[i]
+                        val instr =instruction[index++]
+                        when(instr) {
+                            '+' -> result += item
+                            '*' -> result *= item
+                            '|' -> {
+                                val item1 = result.toString()
+                                val item2 = item.toString()
+                                result = BigInteger(item1+item2)
+                            }
+                        }
+                    }
+                }
+
+                if (result == expected) {
+                    return true
+                }
+
+            }while(instruction.nextExt())
+
+            return false
+        }
     }
 
 
@@ -68,8 +115,25 @@ fun main() {
         return answer
     }
 
-    fun part2(input: List<String>): Int {
-        return 1
+    fun part2(input: List<String>): BigInteger {
+        val equations = parseInput(input)
+        var answer = BigInteger.ZERO
+        var bad = mutableListOf<SingleEquation>()
+        for(equation in equations) {
+            if (equation.checkMe()) {
+                answer += equation.expected
+            } else {
+                bad += equation
+            }
+        }
+
+        for(equation in bad) {
+            if (equation.checkMeExt()) {
+                answer += equation.expected
+            }
+        }
+
+        return answer
     }
 
 
@@ -81,9 +145,7 @@ fun main() {
     val part1 = part1(input)
     part1.println()
     check(part1 == BigInteger.valueOf(12553187650171L)) { "Expected 12553187650171 but got $part1" }
-    /*
         val testPart2 = part2(testInput)
-        check(testPart2 == 1) { "Expected 1 but got $testPart2" }
-        part2(input).println()
-    */
+        check(testPart2 == BigInteger.valueOf(11387L)) { "Expected 1 but got $testPart2" }
+    part2(input).println()
 }

@@ -1,45 +1,3 @@
-/*
-..........
-...#......
-..........
-....a.....
-..........
-.....a....
-..........
-......#...
-..........
-..........
-
-
-p1 3,4
-p2 5,5
-
-delta 2,1 (p2 - p1)
-
-a1 = p1 - delta  1,3   pt - p2 + p1 = 2*p1 - p2
-a2 = p2 + delta  7,6   p2 + p2 -p1 = 2*p2 - p1
-
-----------------
-0,0
-1,3
-
-2*p2 - p1 = 2,6
-3*p2 - p1 = 3,9
-
-
-T....#....
-...T......
-.T....#...
-.........#
-..#.......
-..........
-...#......
-..........
-....#.....
-..........
-
- */
-
 fun main() {
 
     data class NodePair(val left: SimplePoint, val right: SimplePoint)
@@ -70,13 +28,13 @@ fun main() {
         val width = input[0].length
 
         val antinodes = mutableSetOf<SimplePoint>()
-        for(key in data.keys) {
+        for (key in data.keys) {
             val nodes = data[key]
 
             val pairs = mutableSetOf<NodePair>()
 
-            for(i in nodes!!.indices) {
-                for(j in nodes.indices) {
+            for (i in nodes!!.indices) {
+                for (j in nodes.indices) {
                     if (i == j) {
                         continue
                     }
@@ -84,7 +42,7 @@ fun main() {
                     val node1 = nodes[i]
                     val node2 = nodes[j]
 
-                    when(node1.compareTo(node2)) {
+                    when (node1.compareTo(node2)) {
                         0 -> continue
                         -1 -> pairs.add(NodePair(node1, node2))
                         +1 -> pairs.add(NodePair(node2, node1))
@@ -114,13 +72,13 @@ fun main() {
         val width = input[0].length
 
         val antinodes = mutableSetOf<SimplePoint>()
-        for(key in data.keys) {
+        for (key in data.keys) {
             val nodes = data[key]
 
             val pairs = mutableSetOf<NodePair>()
 
-            for(i in nodes!!.indices) {
-                for(j in nodes.indices) {
+            for (i in nodes!!.indices) {
+                for (j in nodes.indices) {
                     if (i == j) {
                         continue
                     }
@@ -128,7 +86,7 @@ fun main() {
                     val node1 = nodes[i]
                     val node2 = nodes[j]
 
-                    when(node1.compareTo(node2)) {
+                    when (node1.compareTo(node2)) {
                         0 -> continue
                         -1 -> pairs.add(NodePair(node1, node2))
                         +1 -> pairs.add(NodePair(node2, node1))
@@ -140,32 +98,31 @@ fun main() {
 
             for (pair in pairs) {
 
-                println("For pair $pair")
+                /*
+                delta p2 - p1
 
-                antinodes.add(pair.left)
-                antinodes.add(pair.right)
-
-                var index = 2
-                var pretender = pair.left * index - pair.right
-                while(pretender.inBound(width, height)) {
+                p1 + delta, p1 + 2*detla ...
+                p2 - delta, p2 - 2*delta ...
+                 */
+                val delta = pair.right - pair.left
+                var counter = 0
+                var pretender = pair.left + delta * counter
+                while (pretender.inBound(width, height)) {
                     antinodes.add(pretender)
-                    println("1 add $pretender")
-                    index++
-                    pretender = pair.left * index - pair.right
+                    counter++
+                    pretender = pair.left + delta * counter
                 }
 
-                index = 2
-                pretender = pair.right * index - pair.left
-                while(pretender.inBound(width, height)) {
+                counter = 0
+                pretender = pair.right - delta * counter
+                while (pretender.inBound(width, height)) {
                     antinodes.add(pretender)
-                    println("2 add $pretender")
-                    index++
-                    pretender = pair.right * index - pair.left
+                    counter++
+                    pretender = pair.right - delta * counter
                 }
             }
         }
 
-        println(antinodes)
         return antinodes.size
     }
 
@@ -182,48 +139,13 @@ fun main() {
     val testInput2 = readInput("Day08_test2")
     val testPart2 = part2(testInput2)
     check(testPart2 == 9) { "Expected 9 but got $testPart2" }
-    /*
-        part2(input).println()
-    */
 
-    /*
-T....#....  SimplePoint(x=5, y=0)  2*3 - 1, 2*1 - 2
-...T......
-.T....#...
-.........#
-..#.......
-..........
-...#......
-..........
-....#.....
-..........
+    val testInput20 = readInput("Day08_test")
+    val testPart20 = part2(testInput20)
+    check(testPart20 == 34) { "Expected 34 but got $testPart2" }
 
-E....E....
-...E......
-.E....E...
-.........E
-..E.......
-..........
-...E......
-..........
-....E.....
-..........
+    val part2 = part2(input)
+    part2.println()
+    check(part2 == 1339) { "Expected 1339 but got $part2" }
 
-SimplePoint(x=0, y=0) ok
-SimplePoint(x=3, y=1) ok
-SimplePoint(x=6, y=2) ok
-SimplePoint(x=9, y=3) ok
-SimplePoint(x=1, y=2) ok
-SimplePoint(x=2, y=4) ok
-SimplePoint(x=3, y=6) ok
-SimplePoint(x=4, y=8) ok
-SimplePoint(x=5, y=0) ok
-SimplePoint(x=8, y=1) ??
-
-delta p2 - p1
-
-p1 + delta, p1 + 2*detla ...
-p2 - delta, p2 - 2*delta ...
-
-     */
 }

@@ -30,7 +30,16 @@ enum class Direction(internal val x: Int, internal val y: Int) {
     NORTH(0, -1), WEST(-1, 0), EAST(1, 0), SOUTH(0, 1)
 }
 
-data class SimplePoint(val x: Int, val y: Int)
+data class SimplePoint(val x: Int, val y: Int) : Comparable<SimplePoint> {
+    fun inBound(width: Int, height: Int): Boolean = x in 0..width - 1 && y in 0..height - 1
+    override fun compareTo(other: SimplePoint): Int = when {
+        x != other.x -> x.compareTo(other.x)
+        else -> y.compareTo(other.y)
+    }
+    operator fun times(other: Int) = SimplePoint(x * other, y * other)
+    operator fun minus(other: SimplePoint) = SimplePoint(x - other.x, y - other.y)
+    operator fun plus(other: SimplePoint) = SimplePoint(x + other.x, y + other.y)
+}
 
 data class OrientedPoint(val x: Int, val y: Int, val direction: Direction) {
     fun turnRight(): OrientedPoint = when (direction) {

@@ -24,7 +24,7 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  */
 fun Any?.println() = println(this)
 
-fun debug(s: String) {if (false) println(s)}
+fun debug(s: String) {if (true) println(s)}
 
 enum class Direction(internal val x: Int, internal val y: Int) {
     NORTH(0, -1), WEST(-1, 0), EAST(1, 0), SOUTH(0, 1)
@@ -51,4 +51,6 @@ data class OrientedPoint(val x: Int, val y: Int, val direction: Direction) {
     fun step(): OrientedPoint = OrientedPoint(x + direction.x, y + direction.y, direction)
     fun toSimplePoint() = SimplePoint(x, y)
 }
+
+data class IntValuePoint(val x: Int, val y: Int, val value: Int)
 

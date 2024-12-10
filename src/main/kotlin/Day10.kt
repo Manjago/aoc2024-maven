@@ -29,41 +29,24 @@ fun main() {
     fun inBound(x: Int, y: Int, width: Int, height: Int): Boolean = x in 0..width - 1 && y in 0..height - 1
 
     fun Array<IntArray>.next(point: IntValuePoint, width: Int, height: Int): Sequence<IntValuePoint> {
-       val result = mutableListOf<IntValuePoint>()
-       var x = point.x+1
-       var y = point.y
-       if (inBound(x, y, width, height) && this[y][x] == point.value + 1) {
-           result.add(IntValuePoint(x, y, this[y][x]))
-       }
+        val result = mutableListOf<IntValuePoint>()
+        val directions = arrayOf(
+            Pair(1, 0),   // right
+            Pair(-1, 0),  // left
+            Pair(0, 1),   // down
+            Pair(0, -1)   // up
+        )
 
-       x = point.x-1
-       y = point.y
-       if (inBound(x, y, width, height) && this[y][x] == point.value + 1) {
-           result.add(IntValuePoint(x, y, this[y][x]))
-       }
-
-       x = point.x
-       y = point.y + 1
-       if (inBound(x, y, width, height) && this[y][x] == point.value + 1) {
-           result.add(IntValuePoint(x, y, this[y][x]))
-       }
-
-       x = point.x
-       y = point.y - 1
-       if (inBound(x, y, width, height) && this[y][x] == point.value + 1) {
-           result.add(IntValuePoint(x, y, this[y][x]))
-       }
-       return result.asSequence()
-    }
-
-    fun List<IntValuePoint>.finger(): String {
-        val sb = StringBuilder()
-        this.forEach {
-            sb.append(":"+ it.x + ","+ it.y)
+        for ((dx, dy) in directions) {
+            val x = point.x + dx
+            val y = point.y + dy
+            if (inBound(x, y, width, height) && this[y][x] == point.value + 1) {
+                result.add(IntValuePoint(x, y, this[y][x]))
+            }
         }
-        return sb.toString()
+        return result.asSequence()
     }
-
+    
     fun part1(input: List<String>): Int {
         val maze = parseInput(input)
         val width = maze[0].size
@@ -81,16 +64,14 @@ fun main() {
             }
         }
 
-        val paths = HashSet<String>()
-        val good = mutableSetOf<IntValuePoint>()
+        val paths = HashSet<List<IntValuePoint>>()
         while(queue.isNotEmpty()) {
             val path: List<IntValuePoint> = queue.removeFirst()
             //debug("Got path: $path")
             val point = path.last()
 
             if (point.value == 9) {
-                paths.add(path.finger())
-                good.add(point)
+                paths.add(path)
             } else {
                 maze.next(point, width, height).forEach {
                     val newItem: MutableList<IntValuePoint> = ArrayList(path)
@@ -99,9 +80,15 @@ fun main() {
                 }
             }
         }
-        //debug(paths.size.toString())
-        //debug(good.size.toString())
-        return good.size
+
+        val origins = paths.asSequence().map { it.first() }.toSet()
+        val scores = origins.asSequence().map { origin ->
+            paths.asSequence().filter { path -> path.first() == origin }
+                .map { it.last() }.toSet().size
+        }.sum()
+
+        return scores
+        
     }
 
     fun part2(input: List<String>): Int {
@@ -124,11 +111,11 @@ fun main() {
     val testPart4 = part1(testInput4)
     check(testPart4 == 36) { "Expected 36 but got $testPart4" }
 
-/*
     val input = readInput("Day10")
     part1(input).println()
-    val testPart2 = part2(testInput)
-    check(testPart2 == 1) { "Expected 1 but got $testPart2" }
-    part2(input).println()
-*/
+    /*
+        val testPart2 = part2(testInput)
+        check(testPart2 == 1) { "Expected 1 but got $testPart2" }
+        part2(input).println()
+    */
 }

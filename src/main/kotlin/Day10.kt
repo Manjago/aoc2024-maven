@@ -14,18 +14,6 @@ fun main() {
         return result
     }
 
-    fun Array<IntArray>.display(): String {
-        val result = StringBuilder()
-        for(y in this.indices) {
-            for(x in this[0].indices) {
-                result.append(this[y][x])
-            }
-            result.append('\n')
-        }
-        return result.toString()
-    }
-
-
     fun inBound(x: Int, y: Int, width: Int, height: Int): Boolean = x in 0..width - 1 && y in 0..height - 1
 
     fun Array<IntArray>.next(point: IntValuePoint, width: Int, height: Int): Sequence<IntValuePoint> {
@@ -47,11 +35,10 @@ fun main() {
         return result.asSequence()
     }
     
-    fun part1(input: List<String>): Int {
+    fun core(input: List<String>): HashSet<List<IntValuePoint>> {
         val maze = parseInput(input)
         val width = maze[0].size
         val height = maze.size
-        //debug(maze.display())
 
         val queue = ArrayDeque<List<IntValuePoint>>()
 
@@ -67,7 +54,6 @@ fun main() {
         val paths = HashSet<List<IntValuePoint>>()
         while(queue.isNotEmpty()) {
             val path: List<IntValuePoint> = queue.removeFirst()
-            //debug("Got path: $path")
             val point = path.last()
 
             if (point.value == 9) {
@@ -81,6 +67,11 @@ fun main() {
             }
         }
 
+        return paths
+    }
+
+    fun part1(input: List<String>): Int {
+        val paths = core(input)
         val origins = paths.asSequence().map { it.first() }.toSet()
         val scores = origins.asSequence().map { origin ->
             paths.asSequence().filter { path -> path.first() == origin }
@@ -88,11 +79,11 @@ fun main() {
         }.sum()
 
         return scores
-        
     }
 
     fun part2(input: List<String>): Int {
-        return 1
+        val paths = core(input)
+        return paths.size
     }
 
     val testInput1 = readInput("Day10_test1")
@@ -112,10 +103,13 @@ fun main() {
     check(testPart4 == 36) { "Expected 36 but got $testPart4" }
 
     val input = readInput("Day10")
-    part1(input).println()
-    /*
-        val testPart2 = part2(testInput)
-        check(testPart2 == 1) { "Expected 1 but got $testPart2" }
-        part2(input).println()
-    */
+    val part1 = part1(input)
+    part1.println()
+    check(part1 == 717) { "Expected 717 but got $testPart4" }
+
+    val testPart2Part2 = part2(testInput4)
+    check(testPart2Part2 == 81) { "Expected 81 but got $testPart2" }
+    val part2 = part2(input)
+    part2.println()
+    check(part2 == 1686) { "Expected 1686 but got $testPart4" }
 }

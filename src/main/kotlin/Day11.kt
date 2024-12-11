@@ -24,33 +24,10 @@ fun main() {
         return result.toList()
     }
 
-    fun tost(input: List<String>, repCount: Int, short: Boolean) {
-        var current = parseInput(input[0])
-        var counter = 0
-        if (short) {
-            println("$counter ${current.size}")
-        } else {
-            println("$counter $current")
-        }
-        repeat(repCount) {
-            val start = System.currentTimeMillis()
-            current = processing(current)
-            val finish = System.currentTimeMillis() - start
-            counter++
-            if (short) {
-                println("$counter ${current.size} in ${finish} ms")
-            } else {
-                println("$counter $current in ${finish} ms")
-            }
-        }
-    }
-
     fun part1(input: List<String>): Int {
         var current = parseInput(input[0])
-        //println(current)
         repeat(25) {
             current = processing(current)
-            //println(current)
         }
         return current.size
     }
@@ -61,39 +38,26 @@ fun main() {
         blink: Int,
         targetBlink: Int
     ): BigInteger = when {
-        blink == targetBlink -> {
-            BigInteger.ONE
-        }
+        blink == targetBlink -> BigInteger.ONE
 
-        memo[blink].containsKey(stone) -> {
-            memo[blink][stone]!!
-        }
+        memo[blink].containsKey(stone) -> memo[blink][stone]!!
 
         else -> {
 
             val asString = stone.toString()
             when {
-                stone == BigInteger.ZERO -> {
-                    val result = dfs(memo, BigInteger.ONE, blink + 1, targetBlink)
-                    memo[blink].put(stone, result)
-                    result
-                }
+                stone == BigInteger.ZERO ->
+                    dfs(memo, BigInteger.ONE, blink + 1, targetBlink).also { memo[blink].put(stone, it) }
 
                 asString.length % 2 == 0 -> {
                     val bound = asString.length / 2
                     val left = dfs(memo, BigInteger(asString.slice(0..bound - 1)), blink + 1, targetBlink)
                     val right =
                         dfs(memo, BigInteger(asString.slice(bound..asString.length - 1)), blink + 1, targetBlink)
-                    val result = left + right
-                    memo[blink].put(stone, result)
-                    result
+                    (left + right).also { memo[blink].put(stone, it) }
                 }
 
-                else -> {
-                    val result = dfs(memo, stone * magic, blink + 1, targetBlink)
-                    memo[blink].put(stone, result)
-                    result
-                }
+                else -> dfs(memo, stone * magic, blink + 1, targetBlink).also { memo[blink].put(stone, it) }
             }
 
         }
@@ -107,17 +71,11 @@ fun main() {
 
         var answer = BigInteger.ZERO
         for (stone in initial) {
-            dfs(memo, stone, 0, depth)
-            answer = answer + memo[0][stone]!!
+            answer = answer + dfs(memo, stone, 0, depth)
         }
 
         return answer
     }
-
-    /*
-        val tostInput = readInput("Day11_tost")
-        tost(tostInput, 25, false)
-    */
 
     val testInput = readInput("Day11_test")
     val testPart1 = part1(testInput)

@@ -23,6 +23,27 @@ fun main() {
         return result.toList()
     }
 
+    fun tost(input: List<String>, repCount: Int, short: Boolean) {
+        var current = parseInput(input[0])
+        var counter = 0
+        if (short) {
+            println("$counter ${current.size}")
+        } else {
+            println("$counter $current")
+        }
+        repeat(repCount) {
+            val start = System.currentTimeMillis()
+            current = processing(current)
+            val finish = System.currentTimeMillis() - start
+            counter++
+            if (short) {
+                println("$counter ${current.size} in ${finish} ms")
+            } else {
+                println("$counter $current in ${finish} ms")
+            }
+        }
+    }
+
     fun part1(input: List<String>): Int {
         var current = parseInput(input[0])
         //println(current)
@@ -37,13 +58,16 @@ fun main() {
         return 1
     }
 
+    val tostInput = readInput("Day11_tost")
+    tost(tostInput, 45, true)
+
+    /*
     val testInput = readInput("Day10_test")
     val testPart1 = part1(testInput)
     check(testPart1 == 55312) { "Expected 55312 but got $testPart1" }
 
     val input = readInput("Day11")
     part1(input).println()
-    /*
         val testPart2 = part2(testInput)
         check(testPart2 == 1) { "Expected 1 but got $testPart2" }
         part2(input).println()

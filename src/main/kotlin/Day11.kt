@@ -5,6 +5,35 @@ fun main() {
 
     fun parseInput(line: String): List<Long> = line.split(" ").asSequence().map { it.toLong() }.toList()
 
+    fun digitCount(n: Long): Int = if (n < 10) {
+        1
+    } else {
+        var count = 0
+        var temp = n
+        while (temp > 0) {
+            temp /= 10
+            count++
+        }
+        count
+    }
+
+    fun splitNumber(n: Long, count: Int): Pair<Long, Long> {
+        if (n < 10) {
+            return Pair(n, 0)
+        }
+
+        val half = count / 2
+        var mid = 1L
+        repeat(half) {
+            mid *= 10
+        }
+
+        val left = n / mid
+        val right = n % mid
+
+        return Pair(left, right)
+    }
+
     fun dfs(
         memo: Array<MutableMap<Long, Long>>,
         stone: Long,
@@ -17,16 +46,16 @@ fun main() {
 
         else -> {
 
-            val asString = stone.toString()
+            val digitCount = digitCount(stone)
             when {
                 stone == 0L ->
                     dfs(memo, 1L, blink + 1, targetBlink).also { memo[blink].put(stone, it) }
 
-                asString.length % 2 == 0 -> {
-                    val bound = asString.length / 2
-                    val left = dfs(memo, asString.slice(0..bound - 1).toLong(), blink + 1, targetBlink)
+                digitCount % 2 == 0 -> {
+                    val (leftSplitted, rightSplitted) = splitNumber(stone, digitCount)
+                    val left = dfs(memo, leftSplitted, blink + 1, targetBlink)
                     val right =
-                        dfs(memo, asString.slice(bound..asString.length - 1).toLong(), blink + 1, targetBlink)
+                        dfs(memo, rightSplitted, blink + 1, targetBlink)
                     (left + right).also { memo[blink].put(stone, it) }
                 }
 

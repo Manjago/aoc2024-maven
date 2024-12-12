@@ -1,11 +1,21 @@
 fun main() {
 
+    val LEFT = SimplePoint(-1, 0)
+    val LOWER = SimplePoint(0, 1)
+    val RIGHT = SimplePoint(1, 0)
+    val UPPER = SimplePoint(0, -1)
+
     val directions = listOf(
-        SimplePoint(1, 0),  // right
-        SimplePoint(-1, 0), // left
-        SimplePoint(0, 1),  // lower
-        SimplePoint(0, -1)  // upper
+        RIGHT, LEFT, LOWER, UPPER
     )
+
+    val horizontal = listOf(
+        RIGHT, LEFT
+    )
+    val vertical = listOf(
+        LOWER, UPPER
+    )
+
 
     fun parseInput(input: List<String>): Array<Array<Char>> {
         val result = Array<Array<Char>>(input.size) { Array(input[0].length) { '.' } }
@@ -60,21 +70,42 @@ fun main() {
         return result
     }
 
-    fun part1(input: List<String>): Long {
+    fun Array<Array<Char>>.corners(region: Set<SimplePoint>): Long {
+        var result = 0L
+        for (p in region) {
+            val myChar = this[p.y][p.x]
+            for (hor in horizontal) {
+                for (vert in vertical) {
+                    if (!isSameChar(myChar, p + hor) && !isSameChar(myChar, p + vert) ||
+                        !isSameChar(myChar,p + vert + hor) && isSameChar(myChar, p + vert) && isSameChar(myChar, p + hor)
+                    ) {
+                        ++result
+                    }
+                }
+            }
+        }
+        return result
+    }
 
-        val data = parseInput(input)
+    fun Array<Array<Char>>.makeRegions(): List<Set<SimplePoint>> {
         val seen = mutableSetOf<SimplePoint>()
         val regions = mutableListOf<Set<SimplePoint>>()
 
-        for (y in data.indices) {
-            for (x in data[y].indices) {
+        for (y in this.indices) {
+            for (x in this[y].indices) {
                 val point = SimplePoint(x, y)
                 if (seen.contains(point)) {
                     continue
                 }
-                regions.add(data.flood(point, seen))
+                regions.add(flood(point, seen))
             }
         }
+        return regions.toList()
+    }
+
+    fun part1(input: List<String>): Long {
+        val data = parseInput(input)
+        val regions = data.makeRegions()
 
         val score = regions.asSequence().map {
             val p = data.perimeter(it)
@@ -84,8 +115,16 @@ fun main() {
         return score
     }
 
-    fun part2(input: List<String>): Int {
-        return 1
+    fun part2(input: List<String>): Long {
+        val data = parseInput(input)
+        val regions = data.makeRegions()
+
+        val score = regions.asSequence().map {
+            val p = data.corners(it)
+            val s = it.size
+            s * p
+        }.sum()
+        return score
     }
 
     val testInput1 = readInput("Day12_test1")
@@ -104,4 +143,11 @@ fun main() {
     val part1 = part1(input)
     part1.println()
     check(part1 == 1363484L) { "Expected 1930 but got $part1" }
+
+    val testPart2 = part2(testInput3_1)
+    check(testPart2 == 1206L) { "Expected 1206 but got $testPart2" }
+
+    val part2 = part2(input)
+    part2.println()
+    check(part2 == 838988L) { "Expected 838988 but got $testPart2" }
 }

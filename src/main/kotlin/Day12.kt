@@ -20,11 +20,11 @@ fun main() {
     fun Array<Array<Char>>.isSameChar(myChar: Char, pretender: SimplePoint): Boolean =
         pretender.inBound(this[0].size, size) && this[pretender.y][pretender.x] == myChar
 
-    fun flood(point: SimplePoint, seen: MutableSet<SimplePoint>, data: Array<Array<Char>>): Set<SimplePoint> {
+    fun Array<Array<Char>>.flood(point: SimplePoint, seen: MutableSet<SimplePoint>): Set<SimplePoint> {
 
         val queue = ArrayDeque<SimplePoint>()
         queue.add(point)
-        val myChar = data[point.y][point.x]
+        val myChar = this[point.y][point.x]
         val region = mutableSetOf(point)
 
         while (queue.isNotEmpty()) {
@@ -35,7 +35,7 @@ fun main() {
                 if (seen.contains(pretender)) {
                     continue
                 }
-                if (data.isSameChar(myChar, pretender)) {
+                if (isSameChar(myChar, pretender)) {
                     region.add(pretender)
                     seen.add(pretender)
                     queue += pretender
@@ -46,13 +46,13 @@ fun main() {
         return region
     }
 
-    fun perimeter(region: Set<SimplePoint>, data: Array<Array<Char>>): Long {
+    fun Array<Array<Char>>.perimeter(region: Set<SimplePoint>): Long {
         var result = 0L
         for (point in region) {
-            val myChar = data[point.y][point.x]
+            val myChar = this[point.y][point.x]
             for (dir in directions) {
                 val pretender = point + dir
-                if (!data.isSameChar(myChar, pretender)) {
+                if (!isSameChar(myChar, pretender)) {
                     ++result
                 }
             }
@@ -72,12 +72,12 @@ fun main() {
                 if (seen.contains(point)) {
                     continue
                 }
-                regions.add(flood(point, seen, data))
+                regions.add(data.flood(point, seen))
             }
         }
 
         val score = regions.asSequence().map {
-            val p = perimeter(it, data)
+            val p = data.perimeter(it)
             val s = it.size
             s * p
         }.sum()

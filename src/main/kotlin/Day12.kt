@@ -1,7 +1,10 @@
 fun main() {
 
     val directions = listOf(
-        SimplePoint(1, 0), SimplePoint(-1, 0), SimplePoint(0, 1), SimplePoint(0, -1)
+        SimplePoint(1, 0),  // right
+        SimplePoint(-1, 0), // left
+        SimplePoint(0, 1),  // lower
+        SimplePoint(0, -1)  // upper
     )
 
     fun parseInput(input: List<String>): Array<Array<Char>> {
@@ -14,10 +17,11 @@ fun main() {
         return result
     }
 
-    fun flood(id: Int, point: SimplePoint, seen: MutableSet<SimplePoint>, data: Array<Array<Char>>): Set<SimplePoint> {
+    fun Array<Array<Char>>.isSameChar(myChar: Char, pretender: SimplePoint): Boolean =
+        pretender.inBound(this[0].size, size) && this[pretender.y][pretender.x] == myChar
 
-        val height = data.size
-        val width = data[0].size
+    fun flood(point: SimplePoint, seen: MutableSet<SimplePoint>, data: Array<Array<Char>>): Set<SimplePoint> {
+
         val queue = ArrayDeque<SimplePoint>()
         queue.add(point)
         val myChar = data[point.y][point.x]
@@ -31,13 +35,10 @@ fun main() {
                 if (seen.contains(pretender)) {
                     continue
                 }
-                if (pretender.inBound(width, height)) {
-                    val hisChar = data[pretender.y][pretender.x]
-                    if (hisChar == myChar) {
-                        region.add(pretender)
-                        seen.add(pretender)
-                        queue += pretender
-                    }
+                if (data.isSameChar(myChar, pretender)) {
+                    region.add(pretender)
+                    seen.add(pretender)
+                    queue += pretender
                 }
             }
         }
@@ -47,19 +48,12 @@ fun main() {
 
     fun perimeter(region: Set<SimplePoint>, data: Array<Array<Char>>): Long {
         var result = 0L
-        val height = data.size
-        val width = data[0].size
         for (point in region) {
             val myChar = data[point.y][point.x]
             for (dir in directions) {
                 val pretender = point + dir
-                if (!pretender.inBound(width, height)) {
+                if (!data.isSameChar(myChar, pretender)) {
                     ++result
-                } else {
-                    val hisChar = data[pretender.y][pretender.x]
-                    if (myChar != hisChar) {
-                        ++result
-                    }
                 }
             }
         }
@@ -70,8 +64,7 @@ fun main() {
 
         val data = parseInput(input)
         val seen = mutableSetOf<SimplePoint>()
-        var id = 0
-        val regions = mutableMapOf<Int, Set<SimplePoint>>()
+        val regions = mutableListOf<Set<SimplePoint>>()
 
         for (y in data.indices) {
             for (x in data[y].indices) {
@@ -79,12 +72,11 @@ fun main() {
                 if (seen.contains(point)) {
                     continue
                 }
-                val region = flood(id, point, seen, data)
-                regions.put(id++, region)
+                regions.add(flood(point, seen, data))
             }
         }
 
-        val score = regions.values.asSequence().map {
+        val score = regions.asSequence().map {
             val p = perimeter(it, data)
             val s = it.size
             s * p

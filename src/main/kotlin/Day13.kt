@@ -59,4 +59,5 @@ fun main() {
 
     val part2 = part2(input)
     part2.println()
+    check(part2 == 93866170395343L) { "Expected 93866170395343 but got $part2" }
 }

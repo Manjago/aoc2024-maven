@@ -54,3 +54,4 @@ data class OrientedPoint(val x: Int, val y: Int, val direction: Direction) {
 
 data class IntValuePoint(val x: Int, val y: Int, val value: Int)
 
+data class LongPoint(val x: Long, val y: Long)

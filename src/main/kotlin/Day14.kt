@@ -43,6 +43,9 @@ fun main() {
     fun List<Robot>.future(time: Int, height: Int, width: Int): List<Robot> =
         this.map { it.future(time, height, width) }.toList()
 
+    fun List<Robot>.next(height: Int, width: Int): List<Robot> =
+        this.future(1, height, width)
+
     fun SimplePoint.quadtrant(height:Int, width: Int): Int {
         val wLimit = width / 2
         val hLimit = height / 2
@@ -66,8 +69,25 @@ fun main() {
         return quadrantCounts.filter { it.key >= 0 }.values.fold(1) { acc, count -> acc * count }
     }
 
-    fun part2(input: List<String>): Int {
-        return 1
+    fun part2(input: List<String>, height: Int, width: Int): Int {
+        var robots = parseInput(input)
+        var good = false
+        var counter = 0
+
+        do{
+           robots = robots.next(height, width)
+           ++counter
+
+           val positions = robots.map { it.pos }.toList()
+           val unuquePositions = robots.map { it.pos }.toSet()
+           good = positions.size == unuquePositions.size
+
+        }while(!good)
+
+        //counter.println()
+        robots.toField(height, width).display().println()
+
+        return counter
     }
 
     val testInput = readInput("Day14_test")
@@ -81,6 +101,8 @@ fun main() {
     /*
         val testPart2 = part2(testInput)
         check(testPart2 == 1) { "Expected 1 but got $testPart2" }
-        part2(input).println()
     */
+    val part2 = part2(input, 103, 101)
+    part2.println()
+    check(part2 == 7916) { "Expected 7916 but got $part2" }
 }

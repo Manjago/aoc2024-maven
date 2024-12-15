@@ -1,78 +1,83 @@
-fun main() {
+class Maze(val data: Array<Array<Char>>, var robot: SimplePoint, val instructions: List<Char>) {
 
-    val BORDER = '#'
-    val ROBOT = '@'
-    val BOX = 'O'
-    val SPACE = '.'
+    companion object {
+        const val BORDER = '#'
+        const val ROBOT = '@'
+        const val BOX = 'O'
+        const val SPACE = '.'
+    }
 
-    class Maze(val data: Array<Array<Char>>, var robot: SimplePoint, val instructions: List<Char>) {
-        val width = data[0].size
-        val height = data.size
+    val width = data[0].size
+    val height = data.size
 
-        val directions = mapOf<Char, SimplePoint>(
-            '^' to SimplePoint(0, -1), 'v' to SimplePoint(0, 1), '>' to SimplePoint(1, 0), '<' to SimplePoint(-1, 0)
-        )
+    val directions = mapOf<Char, SimplePoint>(
+        '^' to SimplePoint(0, -1), 'v' to SimplePoint(0, 1), '>' to SimplePoint(1, 0), '<' to SimplePoint(-1, 0)
+    )
 
-        fun display(): String = buildString {
-            for (y in 0 until height) {
-                appendLine(data[y].joinToString(""))
-            }
+    fun display(): String = buildString {
+        for (y in 0 until height) {
+            appendLine(data[y].joinToString(""))
         }
+    }
 
-        fun moveRobot(instructionNum: Int) {
-            val result = move(robot, instructionNum)
-            if (result) {
-                robot = robot.newByDirections(instructionNum)
-            }
+    fun moveRobot(instructionNum: Int) {
+        val result = move(robot, instructionNum)
+        if (result) {
+            robot = robot.newByDirections(instructionNum)
         }
+    }
 
-        private fun SimplePoint.get() = data[this.y][this.x]
+    private fun SimplePoint.get() = data[this.y][this.x]
 
-        fun SimplePoint.newByDirections(i: Int) = this + this@Maze.directions[this@Maze.instructions[i]]!!
+    fun SimplePoint.newByDirections(i: Int) = this + this@Maze.directions[this@Maze.instructions[i]]!!
 
-        private fun move(from: SimplePoint, instructionNum: Int): Boolean {
-            val toPoint = from.newByDirections(instructionNum)
-            return when {
-                !toPoint.inBound(width, height) || toPoint.get() == BORDER -> false
-                toPoint.get() == SPACE -> {
+    private fun move(from: SimplePoint, instructionNum: Int): Boolean {
+        val toPoint = from.newByDirections(instructionNum)
+        return when {
+            !toPoint.inBound(width, height) || toPoint.get() == BORDER -> false
+            toPoint.get() == SPACE -> {
+                swap(toPoint, from)
+                true
+            }
+
+            else -> {
+                val result = move(toPoint, instructionNum)
+                if (result) {
                     swap(toPoint, from)
-                    true
                 }
-
-                else -> {
-                    val result = move(toPoint, instructionNum)
-                    if (result) {
-                        swap(toPoint, from)
-                    }
-                    result
-                }
-            }
-        }
-
-        private fun swap(a: SimplePoint, b: SimplePoint) {
-            val oldValue = data[a.y][a.x]
-            data[a.y][a.x] = data[b.y][b.x]
-            data[b.y][b.x] = oldValue
-        }
-
-        fun allBoxes(): List<SimplePoint> = data.flatMapIndexed { y, row ->
-            row.mapIndexedNotNull { x, char ->
-                if (char == BOX) SimplePoint(x, y) else null
+                result
             }
         }
     }
 
+    private fun swap(a: SimplePoint, b: SimplePoint) {
+        val oldValue = data[a.y][a.x]
+        data[a.y][a.x] = data[b.y][b.x]
+        data[b.y][b.x] = oldValue
+    }
+
+    fun allBoxes(): List<SimplePoint> = data.flatMapIndexed { y, row ->
+        row.mapIndexedNotNull { x, char ->
+            if (char == BOX) SimplePoint(x, y) else null
+        }
+    }
+
+}
+
+fun main() {
+
+
     fun parseInput(lines: List<String>): Maze {
         val width = lines[0].length
-        val height = lines.count { it.contains(BORDER) }
-        val result = Array(height) { Array(width) { SPACE } }
+        val height = lines.count { it.contains(Maze.BORDER) }
+        val result = Array(height) { Array(width) { Maze.SPACE } }
 
         var robot: SimplePoint? = null
         for (y in 0 until height) {
             for (x in 0 until width) {
                 val char = lines[y][x]
                 result[y][x] = char
-                if (char == ROBOT) {
+                if (char == Maze.ROBOT) {
                     robot = SimplePoint(x, y)
                 }
             }
